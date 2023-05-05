@@ -1,0 +1,101 @@
+- name: Check internet connection to servers
+  ping:
+
+- name: Check Ansible OS Family
+  debug: var=ansible_os_family
+
+
+- name: Install yum utils
+  yum:
+        name: yum-utils
+        state: latest
+
+- name: Install device-mapper-persistent-data
+  yum:
+        name: device-mapper-persistent-data
+        state: latest
+
+- name: Install lvm2
+  yum:
+        name: lvm2
+        state: latest
+
+- name: Update
+  become: true
+  command: >
+        yum update -y
+
+- name: Add Docker repo
+  get_url:
+        url: https://download.docker.com/linux/centos/docker-ce.repo
+        dest: /etc/yum.repos.d/docer-ce.repo
+  become: true
+
+- name: Enable Docker Edge repo
+  ini_file:
+        dest: /etc/yum.repos.d/docer-ce.repo
+        section: 'docker-ce-edge'
+        option: enabled
+        value: 0
+  become: true
+
+- name: Enable Docker Test repo
+  ini_file:
+        dest: /etc/yum.repos.d/docer-ce.repo
+        section: 'docker-ce-test'
+        option: enabled
+        value: 0
+  become: true
+
+- name: Install Docker
+  package:
+        name: docker-ce
+        state: latest
+  become: true
+
+- name: Start Docker service
+  service:
+        name: docker
+        state: started
+        enabled: yes
+  become: true
+
+- name: Add user Bakur to docker group
+  user:
+        name: bakur
+        groups: docker
+        append: yes
+  become: true
+
+
+- name: Install or upgrade docker-compose
+  become: true
+  get_url: 
+    url : "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-Linux-x86_64"
+    dest: /usr/local/bin/docker-compose
+    mode: 'a+x'
+    force: yes
+  when: >
+    docker_compose_current_version is not defined
+    or docker_compose_current_version is version(docker_compose_version, '<')
+
+- name: Create build directory
+  file:
+        path: /home/centos/docker
+        state: directory
+        mode: '0755'
+
+
+- name: Copy docker-compose files
+  copy:
+    src: ./deploy_docker_php/files/
+    dest: /home/centos/docker/
+    mode: '0755'
+
+- name: Run Docker Compose
+  become: true
+  command: >
+         /usr/local/bin/docker-compose -f /home/centos/docker/docker-compose.yaml up -d
+
+
+

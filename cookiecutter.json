@@ -1,0 +1,9 @@
+{
+    "role_name": "deploy_docker_php",
+    "scenario_name": "default",
+    "author": "Maxim Bakur",
+    "description": "your description",
+    "company": "your company (optional)",
+    "license": ["BSD", "MIT", "GPLv2", "GPLv3", "Apache", "CC-BY"],
+    "min_ansible_version": 2.1
+}

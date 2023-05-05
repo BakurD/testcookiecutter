@@ -1,0 +1,23 @@
+---
+
+dependency:
+  name: galaxy  #зависимость по умолчанию
+driver:
+  name: docker # какой драйвер используется для тестирования плейбука, в данном случае докер
+lint: |        # популярные утилиты для обнаружения ошибок
+  yamllint .
+  ansible-lint
+platforms:
+  - name: "molecule-ubuntu1804"
+    image: "geerlingguy/docker-ubuntu1804-ansible" # образ докера - из докерхаба
+    command: ""
+    privileged: true
+    pre_build_image: true
+
+
+provisioner:                                       # инструмент, который запускает файл converenge.yml, единственный поддерживаемый провайдер — Ansible.
+  name: ansible
+  playbooks:
+    converge: converge.yml
+verifier:                                          # инструмент, который проверяет роли
+  name: ansible
